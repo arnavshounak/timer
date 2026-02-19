@@ -3,109 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>24H Study Timer</title>
+<title>Study Timer</title>
 
 <style>
-    body {
+    :root {
+        --bg: #000;
+        --text: #ffffff;
+        --muted: #666;
+        --accent: #ffffff;
+    }
+
+    * {
         margin: 0;
-        background: #000;
-        color: #fff;
-        font-family: 'Courier New', monospace;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
         height: 100vh;
-        flex-direction: column;
-    }
-
-    .timer-wrapper {
-        position: relative;
-        width: 420px;
-        height: 420px;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
+        overflow: hidden;
     }
 
-    svg {
+    .background-pulse {
         position: absolute;
-        transform: rotate(-90deg);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+        animation: pulse 6s infinite ease-in-out;
     }
 
-    .bg-ring {
-        fill: none;
-        stroke: #111;
-        stroke-width: 12;
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.4; }
+        50% { transform: scale(1.2); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 0.4; }
     }
 
-    .progress-ring {
-        fill: none;
-        stroke: #ffffff;
-        stroke-width: 12;
-        stroke-linecap: round;
-        filter: drop-shadow(0 0 10px #ffffff44);
-        transition: stroke-dashoffset 0.5s linear;
-    }
-
-    .time-display {
-        font-size: 64px;
-        letter-spacing: 4px;
-        text-align: center;
+    .timer {
+        font-size: 110px;
         font-weight: 500;
+        letter-spacing: 8px;
+        text-align: center;
+        z-index: 2;
     }
 
     .label {
-        font-size: 14px;
-        letter-spacing: 3px;
-        opacity: 0.5;
-        margin-top: 10px;
+        margin-top: 15px;
+        font-size: 13px;
+        letter-spacing: 4px;
+        color: var(--muted);
+        z-index: 2;
     }
 
     .controls {
         margin-top: 60px;
         display: flex;
-        gap: 25px;
+        gap: 30px;
+        z-index: 2;
     }
 
     button {
-        padding: 14px 28px;
-        font-size: 14px;
+        background: transparent;
+        color: var(--text);
+        border: 1px solid #333;
+        padding: 12px 28px;
+        font-size: 13px;
         letter-spacing: 2px;
         text-transform: uppercase;
-        background: rgba(255,255,255,0.05);
-        color: white;
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 30px;
         cursor: pointer;
-        backdrop-filter: blur(5px);
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
     }
 
     button:hover {
-        background: white;
-        color: black;
-        transform: translateY(-2px);
+        background: #fff;
+        color: #000;
     }
 
     button:active {
-        transform: translateY(0px) scale(0.97);
+        transform: scale(0.96);
     }
 
 </style>
 </head>
 <body>
 
-<div class="timer-wrapper">
-    <svg width="420" height="420">
-        <circle class="bg-ring" cx="210" cy="210" r="190"/>
-        <circle class="progress-ring" cx="210" cy="210" r="190"/>
-    </svg>
+<div class="background-pulse"></div>
 
-    <div>
-        <div class="time-display" id="time">00 : 00 : 00</div>
-        <div class="label">24 HOUR TRACKER</div>
-    </div>
-</div>
+<div class="timer" id="time">00:00:00</div>
+<div class="label">24 HOUR STUDY TRACKER</div>
 
 <div class="controls">
     <button onclick="startTimer()">Start</button>
@@ -118,27 +109,16 @@ const FULL_DAY = 86400;
 let secondsElapsed = 0;
 let timer = null;
 
-const ring = document.querySelector(".progress-ring");
-const radius = 190;
-const circumference = 2 * Math.PI * radius;
-
-ring.style.strokeDasharray = circumference;
-ring.style.strokeDashoffset = circumference;
-
 function formatTime(seconds) {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
 
-    return `${String(hrs).padStart(2,'0')} : ${String(mins).padStart(2,'0')} : ${String(secs).padStart(2,'0')}`;
+    return `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
 }
 
 function updateUI() {
     document.getElementById("time").textContent = formatTime(secondsElapsed);
-
-    const progress = secondsElapsed / FULL_DAY;
-    const offset = circumference - (progress * circumference);
-    ring.style.strokeDashoffset = offset;
 }
 
 function startTimer() {
@@ -150,7 +130,6 @@ function startTimer() {
             timer = null;
             return;
         }
-
         secondsElapsed++;
         updateUI();
     }, 1000);
